@@ -22,8 +22,16 @@ while i < len(inp):
 
 print(weak)
 
-for j in range(len(inp)):
-    for k in range(j + 2, len(inp)):
-        slic = inp[j:k]
-        if sum(slic) == weak:
-            print(min(slic) + max(slic))
+j = 0
+k = 2
+tot = sum(inp[j:k])
+while tot != weak:
+    while tot > weak and j < k - 2:
+        tot -= inp[j]
+        j += 1
+    while tot < weak and k < len(inp):
+        tot += inp[k]
+        k += 1
+
+slic = inp[j:k]
+print(min(slic) + max(slic))
