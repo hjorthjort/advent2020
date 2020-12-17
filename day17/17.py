@@ -11,37 +11,34 @@ for x in range(len(inp)):
         if inp[x][y] == '#':
             pd.add((x,y,z))
 
-def neighs(p):
-    def n1(a):
-        return range(a-1, a+2)
 
+def n1(a):
+    return range(a-1, a+2)
+
+
+def neighs(p):
     (x, y, z) = p
     return [(a,b,c) for a in n1(x) for b in n1(y) for c in n1(z) if (a, b, c) != (x, y, z)]
+
 
 def main(pd, neighs):
     cycles = 6
     for i in range(cycles):
-        consider = set()
+        counts = { p: 0 for p in pd }
         for p in pd:
-            consider.add(p)
             for n in neighs(p):
-                consider.add(n)
+                if n in counts:
+                    counts[n] += 1
+                else:
+                    counts[n] = 1
 
-        on = set()
-        off = set()
-        for p in consider:
-            # Active.
-            ns = neighs(p)
-            act = len([x for x in ns if x in pd])
+        for (p, c) in counts.items():
             if p in pd:
-                if not (2 <= act <= 3):
-                    off.add(p)
+                if not (2 <= c <= 3):
+                    pd.remove(p)
             else:
-                if act == 3:
-                    on.add(p)
-        pd = pd.union(on)
-        pd = pd.difference(off)
-
+                if c == 3:
+                    pd.add(p)
     return (len(list(pd)))
 
 print(main(pd, neighs))
@@ -57,11 +54,10 @@ for x in range(len(inp)):
         if inp[x][y] == '#':
             pd.add((x,y,z,w))
 
-def neighs(p):
-    def n1(a):
-        return range(a-1, a+2)
 
+def neighs(p):
     (x, y, z, w) = p
-    return [(a,b,c,d) for a in n1(x) for b in n1(y) for c in n1(z) for d in n1(w) if (a, b, c, d) != p]
+    res = [(a,b,c,d) for a in n1(x) for b in n1(y) for c in n1(z) for d in n1(w) if (a, b, c, d) != p]
+    return res
 
 print(main(pd, neighs))
