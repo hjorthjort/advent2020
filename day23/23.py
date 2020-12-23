@@ -4,7 +4,7 @@ moves = 100
 cups = [int(x) for x in inp]
 
 def find_next(curr, rem):
-    curr = (curr - 1) % (len(rem) + 1)
+    curr = (curr - 1) % 10
     if curr in rem:
         return rem.index(curr)
     return find_next(curr, rem)
@@ -25,60 +25,61 @@ i = cups.index(1)
 print(''.join(map(str, cups[i+1:] + cups[:i])))
 
 # Part 2
-inp = "389125467"
-
-cups = [int(x) for x in inp]
-m = max(cups)
-moves = 100
-
-cups = { i : cups[i] for i in range(len(cups))}
-cups_rev = { cups[i] : i for i in range(len(cups))}
-
-def update_cups(cup, idx):
-    cups[idx] = cup
-    cups_rev[cup] = idx
-
-for i in range(10, 10):
-    cups[i] = i
-    cups_rev[i] = i
-
-def find_next(curr, cups, skips, length):
-    curr = (curr - 1) % length
-    if curr in cups_rev and curr not in skips:
-        return cups[curr]
-    return find_next(curr, cups, skips, length)
-
-def play(cups, moves):
-    l = len(cups)
-    for i in range(moves):
-        i = i % l + 1
-        print([cups[i] for i in range(len(cups))])
-        print(cups_rev)
-        print(i)
-        assert cups_rev[cups[i]] == i
-        curr = cups[i]
-        holds = [cups[(i+j) % l] for j in range(1, 4)]
-        dest = find_next(curr, cups, holds, l)
-
-        upds = []
-        if i < dest:
-            for j in range(i + 4, dest + 1):
-                upds.append((cups_rev[cups[j]], cups[j] - 3))
-        else:
-            for j in range(dest + 1, i + 1):
-                upds.append(([cups_rev[cups[j]]], cups[j] + 3))
-
-        upds.append((holds[0], dest + 1))
-        upds.append((holds[1], dest + 2))
-        upds.append((holds[2], dest + 3))
-        print(upds)
-
-        for (k, v) in upds:
-            update_cups(k, v)
+moves = 10000000
+circle = 1000000
 
 
+class LList():
+    def __init__(self, val, next=None):
+        self.val = val
+        self.next = next
 
-play(cups, moves)
-print(cups)
-one_idx = cups_rev[1]
-print(cups[one_idx+1] * cups[one_idx + 2])
+    def __eq__(self, value): return self.val == value
+
+    def __ne__(self, value): return not self.__eq__(self, value)
+
+    def __str__(self):
+        s = ''
+        curr = self
+        i = 0
+        while curr is not None and i < 10:
+            s += str(curr.val) + ' '
+            curr = curr.next
+            i += 1
+        appendix = '' if i < 10 else '...'
+        return s + appendix
+
+cs = [int(x) for x in inp] + list(range(10, circle + 1))
+cs.reverse()
+
+last = LList(cs[0])
+cups = last
+
+cups_reverse = { circle : last }
+
+for c in cs[1:]:
+    cups = LList(c, cups)
+    cups_reverse[c] = cups
+
+last.next = cups
+
+for _ in range(moves):
+    curr = cups
+    h_1 = curr.next
+    h_2 = h_1.next
+    h_3 = h_2.next
+    cups.next = h_3.next
+    skip = [x.val for x in [h_1, h_2, h_3]]
+    dest_val = ((curr.val - 2) % circle) + 1
+    while dest_val in skip:
+        dest_val = ((dest_val - 2) % circle) + 1
+    dest = cups_reverse[dest_val]
+    old_dest_neigh = dest.next
+    dest.next = h_1
+    h_3.next = old_dest_neigh
+    cups = cups.next
+
+
+neigh_1 = cups_reverse[1].next
+neigh_2 = neigh_1.next
+print(neigh_1.val * neigh_2.val)
